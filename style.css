@@ -1,3 +1,45 @@
+body{
+  font-family: sans-serif;
+}
+
 .wow {
   width: 100px;
+}
+
+h1{
+    font-size: 26px;
+    color: #2196f3;
+    text-align: center;
+    margin-top: 15px;
+}
+
+.tableMain{
+      border: 1px #e9e9e9 solid;
+    padding: 10px;
+    box-shadow: 0px 6px 9px -6px #222;
+    border-radius: 5px;
+}
+
+.td_canvas{
+  
+}
+
+.td_table table{
+    border-collapse: collapse;
+}
+
+.td_table tr{
+  
+}
+
+.td_table th{
+  color: #6d6d6d;
+  font-size: 12px;  
+}
+
+.td_table td{
+  color: #6d6d6d;
+  font-size: 12px; 
+  border: 1px solid #d0d0d0; 
+  padding: 6px;
 }

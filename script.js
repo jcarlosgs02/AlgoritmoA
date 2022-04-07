@@ -9,8 +9,11 @@ c_borde = "#000000";
 c_inicio = "#ffeb3b";
 c_fin = "#4caf50";
 
+
+
+
 // funcion para la ubicacion en la matriz
-function Lugar(i, j) {
+function Lugar(i, j, inicio_i, inicio_j, fin_i, fin_j) {
   // Se coloca la ubicacion
   this.i = i;
   this.j = j;
@@ -22,6 +25,7 @@ function Lugar(i, j) {
   // Se inicializa la matriz para los vecinos
   this.vecinos = [];
   this.muro = false;
+  this.meta = false;
   
   // se inicializa la variable anterior
   this.previous = undefined;
@@ -30,10 +34,20 @@ function Lugar(i, j) {
   if (i == 1 && j == 1) { this.muro = true; }
   else if (i == 1 && j == 0) { this.muro = true; }
 
+ //Colocando Inicio y Fin
+  if (i == inicio_i && j == inicio_j) { this.meta = true; }
+  else if (i == fin_i && j == fin_j) { this.meta = true; }
+ 
   // Mostrar 
   this.show = function(col) {
     if (this.muro) {
       fill(0);
+      strokeWeight(2);
+      stroke(c_borde);
+      rect(this.i * w, this.j * h, w, h);
+    } else if (this.meta) {
+
+      fill(50);
       strokeWeight(2);
       stroke(c_borde);
       rect(this.i * w, this.j * h, w, h);
@@ -101,8 +115,17 @@ var canvas1b;
 
 function setup(){
   //Se crean los diferentes problemas a resolver
-  setupCanvas(canvas1a, 'div_canvas_1a', grid1a, 2, 2, 0, 0, 'table_1a', path1a);
-  //setupCanvas(canvas1b, 'div_canvas_1b', grid1b, 0, 0, 2, 2, 'table_1b', path1b);
+
+  //M1
+   setupCanvas(canvas1a, 'div_canvas_1a', grid1a, 2, 2, 0, 0, 'table_1a', path1a);
+ 
+  setTimeout(function() { 
+    setupCanvas(canvas1b, 'div_canvas_1b', grid1b, 0, 0, 3, 3, 'table_1b', path1b);
+ }, 7000);
+
+  //M2
+  
+  
 }
 
 //Seteamos datos que seran usados
@@ -123,7 +146,7 @@ function setupCanvas(canvas, divCanvas, grid, inicio_i, inicio_j, fin_i, fin_j, 
   //LLenamos grid con objeto Lugar
   for (var i = 0; i < cols; i++) {
     for (var j = 0; j < rows; j++) {
-      grid[i][j] = new Lugar(i, j);
+      grid[i][j] = new Lugar(i, j, inicio_i, inicio_j, fin_i, fin_j);
     }
   }
 
@@ -242,7 +265,7 @@ function draw_proceso(canvas, closedSet, openSet, actual, grid, path){
   
   //Color para los caminos abiertos
   //for (var i = 0; i < openSet.length; i++) {
-  //  setTiempo(1000, openSet[i], i, c_abierta);
+  // setTiempo(1000, openSet[i], i, c_abierta);
   //}
 
   //Color para el camino principal
@@ -324,3 +347,4 @@ function generate_table(idDiv, iteracion, listaCerrada, listaAbierta, path) {
     // add the row to the end of the table div
     table.appendChild(row);
 }
+ 

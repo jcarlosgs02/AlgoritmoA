@@ -1,16 +1,12 @@
 //Colores
-c_muro = "#000000";
 c_fondo = "#ddf1fa";
 c_abierta = "#ff9780";
 c_cerrada = "#90d6f5";
 c_camino = "#f5f190";
-c_camino_linea = "#64cb68";
 c_borde = "#000000";
-c_inicio = "#ffeb3b";
+c_inicio = "#1a237e";
 c_fin = "#4caf50";
-
-
-
+c_fin_2 = "#89d18c";
 
 // funcion para la ubicacion en la matriz
 function Lugar(i, j, inicio_i, inicio_j, fin_i, fin_j) {
@@ -33,7 +29,7 @@ function Lugar(i, j, inicio_i, inicio_j, fin_i, fin_j) {
   //Colocando los muros
   if (i == 1 && j == 1) { this.muro = true; }
   else if (i == 1 && j == 0) { this.muro = true; }
-
+  
  //Colocando Inicio y Fin
   if (i == inicio_i && j == inicio_j) { this.meta = true; }
   else if (i == fin_i && j == fin_j) { this.meta = true; }
@@ -42,12 +38,6 @@ function Lugar(i, j, inicio_i, inicio_j, fin_i, fin_j) {
   this.show = function(col) {
     if (this.muro) {
       fill(0);
-      strokeWeight(2);
-      stroke(c_borde);
-      rect(this.i * w, this.j * h, w, h);
-    } else if (this.meta) {
-
-      fill(50);
       strokeWeight(2);
       stroke(c_borde);
       rect(this.i * w, this.j * h, w, h);
@@ -78,6 +68,12 @@ function Lugar(i, j, inicio_i, inicio_j, fin_i, fin_j) {
   };
 }
 
+function Inventario(i, j) {
+  // Se coloca la ubicacion
+  this.i = i;
+  this.j = j;
+}
+
 // Funcion que elimina los elementos del arreglo
 function removeFromArray(arr, elt) {
   for (var i = arr.length - 1; i >= 0; i--) {
@@ -103,42 +99,77 @@ var w, h;
 // creamos el grid1a 2D array
 var grid1a = new Array(cols);
 var grid1b = new Array(cols);
+var grid2a = new Array(cols);
+var grid2b = new Array(cols);
+var grid3a = new Array(cols);
+var grid3b = new Array(cols);
 
 // Se crea el arreglo para el path
 var path1a = [];
 var path1b = [];
+var path2a = [];
+var path2b = [];
+var path3a = [];
+var path3b = [];
 
 //Se crean canvas para mostrar caminos
 var canvas1a;
 var canvas1b;
+var canvas2a;
+var canvas2b;
+var canvas3a;
+var canvas3b;
+
+//Funciones que configuran parametros y ejecutan algoritmos A* segun el tipo de inicio y final
+//Se crean los diferentes problemas a resolver
+function setUp1a(){
+//Inventario
+  //var m1 = new Inventario(); m1.i = 0; m1.j = 2;
+  //var aInventarios = new Array();
+  //aInventarios.push(m1);
+  setupCanvas(canvas1a, 'div_canvas_1a', grid1a, 2, 2, 0, 0, 'table_1a', path1a,'table_1a_resultado', true, null);
+}
+
+function setUp1b(){
+  setupCanvas(canvas1b, 'div_canvas_1b', grid1b, 0, 0, 3, 3, 'table_1b', path1b, 'table_1b_resultado', false, null);
+}
+
+function setUp2a(){
+  setupCanvas(canvas2a, 'div_canvas_2a', grid2a, 2, 2, 0, 2, 'table_2a', path2a,'table_2a_resultado', true, null);
+}
+
+function setUp2b(){
+  setupCanvas(canvas2b, 'div_canvas_2b', grid2b, 0, 2, 2, 3, 'table_2b', path2b, 'table_2b_resultado', false, null);
+}
+
+function setUp3a(){
+  setupCanvas(canvas3a, 'div_canvas_3a', grid3a, 2, 2, 3, 0, 'table_3a', path3a,'table_3a_resultado', true, null);
+}
+
+function setUp3b(){
+  setupCanvas(canvas3b, 'div_canvas_3b', grid3b, 3, 0, 1, 3, 'table_3b', path3b, 'table_3b_resultado', false, null);
+}
 
 
 function setup(){
-  //Se crean los diferentes problemas a resolver
-
-  //M1
-   setupCanvas(canvas1a, 'div_canvas_1a', grid1a, 2, 2, 0, 0, 'table_1a', path1a);
- 
-  setTimeout(function() { 
-    setupCanvas(canvas1b, 'div_canvas_1b', grid1b, 0, 0, 3, 3, 'table_1b', path1b);
- }, 7000);
-
-  //M2
-  
-  
+  //Llama al primer problema por resolver
+   setUp1a();
 }
 
-//Seteamos datos que seran usados
-function setupCanvas(canvas, divCanvas, grid, inicio_i, inicio_j, fin_i, fin_j, tableId, path) {
+//Seteamos datos que seran usados para ejecutar A*, dibujar canvas y mostrar resultados
+function setupCanvas(canvas, divCanvas, grid, inicio_i, inicio_j, fin_i, fin_j, tableId, path, tableAccionesId, isTomar, inventarios) {
   canvas = createCanvas(300, 300);//Se crea un canvas
   canvas.parent(divCanvas);
   console.log('A*');//se revisa en Consola el inicio del algoritmo
+
+  //Limpiamos tabla de resultados
+  initTable(tableId);
 
   // Se crea el tamaño de las casillas
   w = canvas.width / cols;
   h = canvas.height / rows;
 
-  // Creando el arreglo
+  // Creamos el arreglo para inicializar arreglo de filas y columnas
   for (var i = 0; i < cols; i++) {
     grid[i] = new Array(rows);
   }
@@ -147,6 +178,13 @@ function setupCanvas(canvas, divCanvas, grid, inicio_i, inicio_j, fin_i, fin_j, 
   for (var i = 0; i < cols; i++) {
     for (var j = 0; j < rows; j++) {
       grid[i][j] = new Lugar(i, j, inicio_i, inicio_j, fin_i, fin_j);
+    }
+  }
+
+  //Agregamos inventarios como pared
+  if(inventarios != null){
+    for(var i = 0; i< inventarios.length; i++){
+      grid[inventarios[i].i][inventarios[i].j].muro = true;
     }
   }
 
@@ -162,25 +200,31 @@ function setupCanvas(canvas, divCanvas, grid, inicio_i, inicio_j, fin_i, fin_j, 
   var fin = grid[fin_i][fin_j];
 
   //Iniciamos proceso con las variables seteadas
-  this.iniciar(canvas, inicio, fin, tableId, path, grid);
+  this.iniciar(canvas, inicio, fin, tableId, path, grid, tableAccionesId, isTomar);
 }
 
-//Funcion de canvas para dibujar, se ejecuta despues dedl setUp 
+//Funcion de canvas para dibujar, se ejecuta despues del setUp 
 function draw() {
-  //this.iniciar();
+  
 }
 
-function iniciar(canvas,inicio, fin, tableId, path, grid){
-  console.log("Iniciando canvas: " + canvas);
+function iniciar(canvas,inicio, fin, tableId, path, grid, tableAccionesId, isTomar){
+  console.log("Iniciando canvas");
+  //Colocamos el fondo del canvas
   canvas.background(c_fondo);
   
   // Inicializamos las listas de abierto y cerrada
   var openSet = [];
   var closedSet = [];
+  
+  //Agregamos el inicio a la lista openSet
   openSet.push(inicio);
+  
+  //Asignamos valor actual
   var actual = inicio;
   var iteracion = 0;
-  
+
+  //Mientras haya valores en la lista openSet ejecutar algoritmo A*
   while(openSet.length > 0){
     iteracion++;
     //Buscando la mejor opcion
@@ -236,7 +280,8 @@ function iniciar(canvas,inicio, fin, tableId, path, grid){
     path = [];
     var temp = actual;
     path.push(temp);
-  
+
+    //Iteramos sobre cada lugar para identificar el valor previo empezando por el ultimo
     while (temp.previous) {
       path.push(temp.previous);
       temp = temp.previous;
@@ -246,21 +291,38 @@ function iniciar(canvas,inicio, fin, tableId, path, grid){
     //Impirmir resusltados
     generate_table(tableId, iteracion, closedSet, openSet, path);
   }
+
+  //Validadr si tuvo solucion
+  if(openSet.length == 0){
+    alert('No hay solucion');
+  }else{
     //Dibujar proceso
-    draw_proceso(canvas, closedSet, openSet, actual, grid, path);
+    draw_proceso(canvas, closedSet, openSet, actual, grid, path, inicio, fin);
+
+    //Tabla de acciones
+    generate_table_resultado(tableAccionesId, path, inicio, fin, isTomar)
+  }
 }
 
-function draw_proceso(canvas, closedSet, openSet, actual, grid, path){
+function draw_proceso(canvas, closedSet, openSet, actual, grid, path, inicio, fin){
+  //Ponemos color de fondo
   canvas.background(c_fondo);
+
+  //Pintamos celda con color de fondo
   for (var i = 0; i < cols; i++) {
     for (var j = 0; j < rows; j++) {
       grid[i][j].show(c_fondo);
     }
   }
+
+  //Ponemos celdas de inicio y fin
+  setTiempo(100, inicio, 0, c_cerrada);
+  setTiempo(200, fin, 0, c_fin_2);
   
   //Color para los caminos revisados
+  var t1 = 500;
   for (var i = 0; i < closedSet.length; i++) {
-   setTiempo(1000, closedSet[i], i, c_cerrada);
+   setTiempo(t1, closedSet[i], i, c_cerrada);
   }
   
   //Color para los caminos abiertos
@@ -269,69 +331,84 @@ function draw_proceso(canvas, closedSet, openSet, actual, grid, path){
   //}
 
   //Color para el camino principal
+  var t2 = (t1 + (500 * closedSet.length));
   for (var i = 0; i < path.length; i++) {
-    setTiempo(4000, path[i], i, c_camino);
+    setTiempo(t2, path[i], i, c_camino);
   }
+  
+  //Color para meta
+  var t3 = t2 + (500 * path.length);
+  setTiempo(t3, fin, 0, c_fin);
   
   for (var i = 0; i < path.length; i++) {
     vertex(path[i].i * w + w / 2, path[i].j * h + h / 2);
   }
 }
 
+//Funcion que pinta sobre la celda, con un color y despues ded cierto tiempo
 function setTiempo(t, valor, i, color){
     setTimeout(function() {
       valor.show(color);
     }, t + (i * 500));
 }
 
-function generate_table(idDiv, iteracion, listaCerrada, listaAbierta, path) {
-  // get the reference for the body
+//Inicializa valores de tabla
+function initTable(idDiv){
   var table = document.getElementById(idDiv);
+    //Crea encabezados
+  var sHead = "<tr><th>Iteracion</th><th>Lista cerrada</th><th>Lista Abierta</th><th>Calculos</th><th>Path</th></tr>";
+  table.innerHTML = sHead;
+}
 
-    // creates a table row
-    var row = document.createElement("tr");
+//Genera tabla
+function generate_table(idDiv, iteracion, listaCerrada, listaAbierta, path) {
+  //Obtienen elemento id
+  var table = document.getElementById(idDiv);
+    
+  // Crea table row
+  var row = document.createElement("tr");
 
-    //Crear iteracion
-    var cell_iteracion = document.createElement("td");
-    var cellText_iteracion = document.createTextNode(iteracion);           
-    cell_iteracion.appendChild(cellText_iteracion);
-    row.appendChild(cell_iteracion);
+  //Crear valor iteracion
+  var cell_iteracion = document.createElement("td");
+  var cellText_iteracion = document.createTextNode(iteracion);           
+  cell_iteracion.appendChild(cellText_iteracion);
+  row.appendChild(cell_iteracion);
 
-    //Crear lista cerrada
-    var cadena_lc = "";
-    for (var i = 0; i < listaCerrada.length; i++){
-      if(i != 0) cadena_lc += ", ";
-      cadena_lc += "R(" + listaCerrada[i].i + "," + listaCerrada[i].j + ")";
-    }
-    var cell_lc = document.createElement("td");
-    var cellText_lc = document.createTextNode(cadena_lc);           
-    cell_lc.appendChild(cellText_lc);
-    row.appendChild(cell_lc);
+  //Crear valor lista cerrada
+  var cadena_lc = "";
+  for (var i = 0; i < listaCerrada.length; i++){
+    if(i != 0) cadena_lc += ", ";
+    cadena_lc += "R(" + listaCerrada[i].i + "," + listaCerrada[i].j + ")";
+  }
+  var cell_lc = document.createElement("td");
+  var cellText_lc = document.createTextNode(cadena_lc);           
+  cell_lc.appendChild(cellText_lc);
+  row.appendChild(cell_lc);
   
-    //Crear lista abierta
-    var cadena_la = "";
-    for (var i = 0; i < listaAbierta.length; i++){
-      if(i != 0) cadena_la += ", ";
-      cadena_la += "R(" + listaAbierta[i].i + "," + listaAbierta[i].j + ")";
-    }
-    var cell_la = document.createElement("td");
-    var cellText_la = document.createTextNode(cadena_la);           
-    cell_la.appendChild(cellText_la);
-    row.appendChild(cell_la);
+  //Crear valor lista abierta
+  var cadena_la = "";
+  for (var i = 0; i < listaAbierta.length; i++){
+    if(i != 0) cadena_la += ", ";
+    cadena_la += "R(" + listaAbierta[i].i + "," + listaAbierta[i].j + ")";
+  }
+  var cell_la = document.createElement("td");
+  var cellText_la = document.createTextNode(cadena_la);           
+  cell_la.appendChild(cellText_la);
+  row.appendChild(cell_la);
 
-    //Crear calculos
-    var cadena_calculos = "";
-    for (var i = 0; i < listaAbierta.length; i++){
-      if(i != 0) cadena_calculos += ", ";
-      cadena_calculos += "F(" + listaAbierta[i].i + "," + listaAbierta[i].j + ")=" 
-        + listaAbierta[i].g + " + " + listaAbierta[i].h + " = " + listaAbierta[i].f;
-    }
-    var cell_calculo = document.createElement("td");
-    var cellText_calculo = document.createTextNode(cadena_calculos);           
-    cell_calculo.appendChild(cellText_calculo);
-    row.appendChild(cell_calculo);
+  //Crear valor calculos
+  var cell_calculo = document.createElement("td"); 
+  for (var i = 0; i < listaAbierta.length; i++){
+    var cadena_calculos = "F(" + listaAbierta[i].i + "," + listaAbierta[i].j + ")=" 
+      + listaAbierta[i].g + " + " + listaAbierta[i].h + " = " + listaAbierta[i].f;
+    var td_1 = document.createElement("p");
+    var td_node = document.createTextNode(cadena_calculos);           
+    td_1.appendChild(td_node);
+    cell_calculo.appendChild(td_1);
+  }         
+  row.appendChild(cell_calculo);
 
-    //Camino final
+  //Crea camino final
   if(iteracion != 0){
     var cadena_path = "";
     for (var i = 0; i < path.length; i++){
@@ -344,7 +421,59 @@ function generate_table(idDiv, iteracion, listaCerrada, listaAbierta, path) {
     row.appendChild(cell_path);
   }
   
-    // add the row to the end of the table div
+  //Agrega fila a la tabla
+  table.appendChild(row);
+}
+
+//Genera tabla con las acciones a realizar
+function generate_table_resultado(idDiv, path, origen, fin, isTomar) {
+  //Obtiene tabla
+  var table = document.getElementById(idDiv);
+  var sHead = "<tr><th>Acciones</th></tr>";
+  table.innerHTML = sHead;
+
+  //Crea valores para los pasos
+  for (var i = 0; i < path.length; i++){
+    var textBase = "Mover";
+    if(i == 0){
+      if(isTomar){
+        textBase = "Robot inicio";
+      }else{
+        textBase = "Robot con inventario inicio";
+      }
+    }
+    
+    var row = document.createElement("tr");
+    var cadena_path = "";
+    cadena_path += textBase + "(" + path[i].i + "," + path[i].j + ")";
+    var cell_path = document.createElement("td");
+    var cellText_path = document.createTextNode(cadena_path);           
+    cell_path.appendChild(cellText_path);
+    row.appendChild(cell_path);
     table.appendChild(row);
+  }
+
+  //Agrega valor de mover final
+  var rowFinM = document.createElement("tr");
+  var cellFinM = document.createElement("td");
+  var cadenaFinM = "Mover: (" + fin.i + "," + fin.j + ")";
+  var cellTextFinM = document.createTextNode(cadenaFinM);
+  cellFinM.appendChild(cellTextFinM);
+  rowFinM.appendChild(cellFinM);
+  table.appendChild(rowFinM);
+
+  //Agrega paso final
+  var rowFin = document.createElement("tr");
+  var cellFin = document.createElement("td");
+  var cadenaFin = "";
+  if(isTomar){ 
+    cadenaFin = "Robot toma inventario: (" + fin.i + "," + fin.j + ")";
+  }else{
+    cadenaFin = "Robot deja inventario: (" + fin.i + "," + fin.j + ")";
+  } 
+  var cellTextFin = document.createTextNode(cadenaFin);
+  cellFin.appendChild(cellTextFin);
+  rowFin.appendChild(cellFin);
+  table.appendChild(rowFin);
 }
  

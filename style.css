@@ -11,6 +11,8 @@ h1{
     color: #2196f3;
     text-align: center;
     margin-top: 15px;
+  vertical-align: sub;
+    display: inline-block;
 }
 
 .tableMain{
@@ -21,7 +23,12 @@ h1{
 }
 
 .td_canvas{
-  
+    vertical-align: top;
+    text-align: center;
+}
+
+.td_table{
+    vertical-align: top;
 }
 
 .td_table table{
@@ -42,4 +49,14 @@ h1{
   font-size: 12px; 
   border: 1px solid #d0d0d0; 
   padding: 6px;
+}
+
+.boton_accion{
+  padding: 10px;
+    background: #2196f3;
+    border-radius: 3px;
+    margin-bottom: 10px;
+    border: 1px solid #6b97bb;
+    color: #fff;
+  cursor: pointer;
 }
